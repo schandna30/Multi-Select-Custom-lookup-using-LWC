@@ -12,6 +12,14 @@
                           placeholder={placeholder} 
                           onchange={changeHandler} 
                           class="slds-var-p-left_small slds-var-p-right_small"></lightning-input>
+                          <template lwc:if={showPillContainer}>
+                            <lightning-pill-container
+                            items={selectedRecords}
+                            onitemremove={handleItemRemove}
+                            >
+
+                            </lightning-pill-container>
+                          </template>
                            
                         </div>
                         <template lwc:if={hasRecords}>
@@ -33,7 +41,7 @@
                                         </span>
                                         <span class="slds-media__body">
                                             <span
-                                                class="slds-listbox__option-text slds-listbox__option-text_entity" data-recid={output.Id}>{output.Name}</span>
+                                                class="slds-listbox__option-text slds-listbox__option-text_entity" data-recid={output.Id} >{output.Name}</span>
                                         
                                         </span>
                                     </div>

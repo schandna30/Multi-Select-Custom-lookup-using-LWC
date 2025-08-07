@@ -1,11 +1,14 @@
 import { api, LightningElement ,wire} from 'lwc';
 import fetchLookupdata from '@salesforce/apex/customLookupController.fetchLookupdata';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
 const DELAY=300;
 export default class MultiLookup extends LightningElement {
     searchKey;
     hasRecords=false;
     serachOutput=[];
     timeout;
+    selectedRecords=[];
     
     @api label='Account';
     @api iconName='standard:account'
@@ -29,28 +32,60 @@ export default class MultiLookup extends LightningElement {
         }
     }
     changeHandler(event){
-        clearTimeout(this.timeOut);
+        clearTimeout(this.timeout);
         let value= event.target.value;
         console.log(this.value,value);
-        this.timeOut= setTimeout(()=>{this.searchKey=value;},DELAY);
+        this.timeout= setTimeout(()=>{this.searchKey=value;},DELAY);
     }
     clickHandler(event)
     {
+
         let recId=event.target.getAttribute("data-recid");
         console.log(recId,"recId");
-        let seletcedRecord= this.serachOutput.find((currItem)=>currItem.Id===recId);
+        if(this.validateDuplicate(recId)){
+          let selectedRecord= this.serachOutput.find((currItem)=>currItem.Id===recId);
           let Pill = [
         {
             type: 'icon',
-            name: 'recId',
-            label:  'seletcedRecord.Name',
-            IconName: 'this.iconName',
-            alternativeText: 'seletcedRecord.Name',
+            name: recId,
+            label:  selectedRecord.Name,
+            IconName: this.iconName,
+            alternativeText: selectedRecord.Name
             
         }
       
     ];
+    this.selectedRecords=[...this.selectedRecords, Pill];
+        }
+       
     }
     
+    get showPillContainer(){
+        return this.selectedRecords.length >0 ? true :false;
 
+    }
+    handleItemRemove(event){
+       
+        const index = event.detail.index;
+        this.selectedRecords.splice(index, 1);
+    }
+
+    validateDuplicate(selectedRecord){
+        let isValid=true;
+        let isRecordAlreadySelected= this.selectedRecords.find((currItem=>currItem.Name===selectedRecord))
+        if(isRecordAlreadySelected){
+            isValid=false;
+            this.dispatchEvent(new ShowToastEvent({
+                title:'Error',
+                message:'Record Already Removed',
+                variant: 'error'
+            }));
+         
+        }
+        else{
+            isValid=true;
+        }
+
+        return isValid;
+    }
 }
